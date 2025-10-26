@@ -1,7 +1,7 @@
 pub mod thumbnail;
 pub mod video_item;
 
-use crate::youtube::models::thumbnail::Thumbnail;
+use crate::models::thumbnail::Thumbnail;
 
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct ChannelTag {

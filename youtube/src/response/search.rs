@@ -1,4 +1,4 @@
-use crate::youtube::{
+use crate::{
     models::{ChannelTag, VideoTag},
     response::player::Thumbnails,
 };

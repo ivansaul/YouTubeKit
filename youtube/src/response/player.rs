@@ -1,4 +1,4 @@
-use crate::youtube::models::thumbnail::Thumbnail;
+use crate::models::thumbnail::Thumbnail;
 use serde::Deserialize;
 use serde_with::serde_as;
 use serde_with::DisplayFromStr;

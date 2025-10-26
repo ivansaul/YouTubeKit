@@ -1,0 +1,12 @@
+[package]
+name = "youtube"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+common = { path = "../common" }
+innertube = { path = "../innertube" }
+serde.workspace = true
+serde_json.workspace = true
+serde_with.workspace = true
+uniffi.workspace = true

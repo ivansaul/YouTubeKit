@@ -1,4 +1,4 @@
-use crate::error::Result;
+use common::error::Result;
 use serde_json::Value;
 use std::sync::OnceLock;
 

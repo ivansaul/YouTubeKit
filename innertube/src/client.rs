@@ -1,5 +1,5 @@
-use crate::error::Result;
-use crate::innertube::models::ClientType;
+use crate::models::ClientType;
+use common::error::Result;
 use reqwest::{header::HeaderMap, Response};
 use serde::de::DeserializeOwned;
 use serde_json::{json, Value};

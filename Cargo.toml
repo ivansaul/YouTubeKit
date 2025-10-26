@@ -7,7 +7,10 @@ edition = "2021"
 crate-type = ["staticlib", "lib"]
 name = "ytkit"
 
-[dependencies]
+[workspace]
+members = ["common", "innertube", "youtube"]
+
+[workspace.dependencies]
 anyhow = "1.0.100"
 reqwest = { version = "0.12.23", features = ["json"] }
 serde = { version = "1.0.221", features = ["derive"] }
@@ -17,3 +20,17 @@ strum = { version = "0.27.2", features = ["derive"] }
 thiserror = "2.0.16"
 tokio = { version = "1.47.1", features = ["full"] }
 uniffi = { version = "0.29", features = ["tokio"] }
+
+[dependencies]
+common = { path = "common" }
+innertube = { path = "innertube" }
+youtube = { path = "youtube" }
+anyhow.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_with.workspace = true
+strum.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+uniffi.workspace = true

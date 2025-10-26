@@ -1,4 +1,4 @@
-// #[derive(Debug, uniffi::Error, thiserror::Error)]
+// #[derive(Debug, thiserror::Error)]
 // pub enum Error {
 //     #[error("{0}")]
 //     Request(#[from] reqwest::Error),

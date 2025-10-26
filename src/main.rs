@@ -1,5 +1,5 @@
 use anyhow::Result;
-use ytkit::youtube::client::YouTube;
+use youtube::client::YouTube;
 
 #[tokio::main]
 async fn main() -> Result<()> {

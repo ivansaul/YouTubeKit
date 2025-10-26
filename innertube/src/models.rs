@@ -1,4 +1,5 @@
-use crate::{error::Result, innertube::config::*};
+use crate::config::*;
+use common::error::Result;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use serde::Deserialize;
 use serde_json::Value;

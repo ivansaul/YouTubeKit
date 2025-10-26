@@ -1,8 +1,5 @@
-pub mod error;
-pub mod innertube;
-pub mod youtube;
-
 uniffi::setup_scaffolding!();
+pub mod client;
 
 // You can annotate items with uniffi macros to make them available in your swift package.
 // You can export functions...
