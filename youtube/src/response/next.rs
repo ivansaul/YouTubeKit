@@ -23,7 +23,7 @@ impl NextResponse {
             ".lockupViewModel",
         );
 
-        let video_id_path = concat!("$.contentId");
+        let video_id_path = "$.contentId";
 
         let video_title_path = concat!(
             "$.metadata",
@@ -123,11 +123,10 @@ impl NextResponse {
                 id: video_id.into(),
                 name: video_title.into(),
                 thumbnail: video_thumbnail,
-                // thumbnail: Vec::new(),
-                publish_date: publish_date,
+                publish_date,
                 length_text: lenght_text,
-                view_count: view_count,
-                channel: channel,
+                view_count,
+                channel,
             });
         }
         Ok(recomended_videos)

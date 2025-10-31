@@ -199,7 +199,7 @@ fn map_video_render(item: &VideoRenderer) -> VideoTag {
         publish_date: item.published_time_text.as_ref().map(|i| i.text.clone()),
         length_text: item.length_text.as_ref().map(|i| i.text.clone()),
         view_count: item.short_view_count_text.as_ref().map(|i| i.text.clone()),
-        channel: channel,
+        channel,
     }
 }
 
@@ -220,7 +220,7 @@ impl SearchResponse {
                 ItemSectionRendererItem::VideoRenderer(item) => Some(item),
                 _ => None,
             })
-            .map(|item| map_video_render(item))
+            .map(map_video_render)
             .collect::<Vec<_>>()
     }
 }

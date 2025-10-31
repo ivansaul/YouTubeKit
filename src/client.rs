@@ -38,3 +38,9 @@ impl YouTubeBridge {
         Ok(json)
     }
 }
+
+impl Default for YouTubeBridge {
+    fn default() -> Self {
+        Self::new()
+    }
+}

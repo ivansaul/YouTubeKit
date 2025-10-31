@@ -64,3 +64,9 @@ impl YouTube {
         Ok("token".to_string())
     }
 }
+
+impl Default for YouTube {
+    fn default() -> Self {
+        Self::new()
+    }
+}
