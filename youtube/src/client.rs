@@ -3,6 +3,7 @@ use crate::models::VideoTag;
 use crate::response::next::NextResponse;
 use crate::response::player::PlayerResponse;
 use crate::response::search::{SearchResponse, SectionListRendererItem};
+
 use common::error::Result;
 use innertube::{client::Innertube, models::ClientType};
 use serde_json::Value;
@@ -14,16 +15,13 @@ impl YouTube {
         Self
     }
 
-    pub async fn get_video_details<S: AsRef<str>>(
-        &self,
-        video_id: S,
-    ) -> Result<Option<VideoDetails>> {
+    pub async fn fetch_video_details<S: AsRef<str>>(&self, video_id: S) -> Result<VideoDetails> {
         let innertube = Innertube::new(ClientType::WEB);
         let response = innertube
             .player::<PlayerResponse>(video_id.as_ref())
             .await?;
 
-        Ok(response.map_video_details())
+        Ok(response.map_video_details()?)
     }
 
     pub async fn search<S: AsRef<str>>(&self, query: S) -> Result<Vec<VideoTag>> {
@@ -33,7 +31,10 @@ impl YouTube {
         Ok(data)
     }
 
-    pub async fn next<S: AsRef<str>>(&self, video_id: S) -> Result<Vec<VideoTag>> {
+    pub async fn fetch_recommended_videos<S: AsRef<str>>(
+        &self,
+        video_id: S,
+    ) -> Result<Vec<VideoTag>> {
         let innertube = Innertube::new(ClientType::WEB);
         let value = innertube.next::<Value>(video_id).await?;
         NextResponse::new(value).map_recommended_videos()

@@ -1,5 +1,7 @@
 use crate::models::thumbnail::Thumbnail;
 use crate::models::video_details::VideoDetails;
+
+use common::error::ExtractionError;
 use serde::Deserialize;
 use serde_with::serde_as;
 use serde_with::DisplayFromStr;
@@ -8,6 +10,7 @@ use time::OffsetDateTime;
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlayerResponse {
+    pub playability_status: PlayabilityStatus,
     pub video_details: Option<VideoDetailsResponse>,
     pub microformat: Option<Microformat>,
 }
@@ -48,37 +51,62 @@ pub struct VideoDetailsResponse {
     pub is_live_content: bool,
 }
 
+#[allow(dead_code)]
+#[derive(Debug, Deserialize)]
+#[serde(tag = "status", rename_all = "SCREAMING_SNAKE_CASE")]
+pub(crate) enum PlayabilityStatus {
+    #[serde(rename_all = "camelCase")]
+    Ok,
+
+    /// Age limit / Private video
+    #[serde(rename_all = "camelCase")]
+    LoginRequired {
+        #[serde(default)]
+        reason: String,
+    },
+
+    /// Video was censored / deleted / unavailable
+    #[serde(rename_all = "camelCase")]
+    Error {
+        #[serde(default)]
+        reason: String,
+    },
+}
+
 #[derive(Debug, Deserialize)]
 pub struct Thumbnails {
     pub thumbnails: Vec<Thumbnail>,
 }
 
 impl PlayerResponse {
-    pub fn map_video_details(self) -> Option<VideoDetails> {
+    pub fn map_video_details(self) -> Result<VideoDetails, ExtractionError> {
+        if let PlayabilityStatus::Error { reason } = self.playability_status {
+            return Err(ExtractionError::Unavailable { reason });
+        }
+
+        let details = self.video_details.ok_or(ExtractionError::InvalidData(
+            "[PlayerResponse] Video details not found",
+        ))?;
+
         let mut video = VideoDetails {
+            id: details.video_id,
+            title: details.title,
+            duration: details.length_seconds,
+            keywords: details.keywords,
+            description: details.short_description,
+            thumbnail: details.thumbnail.thumbnails,
+            view_count: details.view_count,
+            is_live: details.is_live_content,
             ..Default::default()
         };
 
-        if let Some(vd) = self.video_details {
-            video.id = vd.video_id;
-            video.name = vd.title;
-            video.duration = vd.length_seconds;
-            video.keywords = vd.keywords;
-            video.description = vd.short_description;
-            video.thumbnail = vd.thumbnail.thumbnails;
-            video.view_count = vd.view_count;
-            video.is_live = vd.is_live_content;
-        } else {
-            return None;
+        if let Some(mf) = self.microformat.map(|p| p.player_microformat_renderer) {
+            video.like_count = mf.like_count;
+            video.is_short = mf.is_shorts_eligible;
+            video.category = mf.category;
+            video.publish_date = mf.publish_date;
         }
 
-        if let Some(mf) = self.microformat {
-            video.like_count = mf.player_microformat_renderer.like_count;
-            video.is_short = mf.player_microformat_renderer.is_shorts_eligible;
-            video.category = mf.player_microformat_renderer.category;
-            video.publish_date = mf.player_microformat_renderer.publish_date;
-        }
-
-        Some(video)
+        Ok(video)
     }
 }

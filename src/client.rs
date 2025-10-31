@@ -27,13 +27,13 @@ impl YouTubeBridge {
     }
 
     pub async fn fetch_video_details(&self, video_id: String) -> Result<String> {
-        let res = self.inner.get_video_details(video_id).await?;
+        let res = self.inner.fetch_video_details(video_id).await?;
         let json = serde_json::to_string(&res)?;
         Ok(json)
     }
 
     pub async fn next(&self, video_id: String) -> Result<String> {
-        let res = self.inner.next(video_id).await?;
+        let res = self.inner.fetch_recommended_videos(video_id).await?;
         let json = serde_json::to_string(&res)?;
         Ok(json)
     }

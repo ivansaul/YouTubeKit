@@ -7,7 +7,7 @@ pub struct VideoDetails {
     /// Unique YouTube video ID
     pub id: String,
     /// Video title
-    pub name: String,
+    pub title: String,
     /// Video duration in seconds.
     ///
     /// Is [`None`] for livestreams.

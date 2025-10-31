@@ -14,6 +14,7 @@ members = ["common", "innertube", "youtube"]
 anyhow = "1.0.100"
 jsonpath-rust = "1.0.4"
 reqwest = { version = "0.12.23", features = ["json"] }
+rstest = "0.26.1"
 serde = { version = "1.0.221", features = ["derive"] }
 serde_json = "1.0.145"
 serde_with = "3.15.0"

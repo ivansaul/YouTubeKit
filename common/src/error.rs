@@ -44,6 +44,20 @@ impl From<ExtractionError> for Error {
 /// Error extracting content from YouTube
 #[derive(thiserror::Error, Debug)]
 pub enum ExtractionError {
+    /// YouTube returned data that could not be deserialized or parsed
     #[error("invalid data from YT: {0}")]
     InvalidData(&'static str),
+
+    /// Content cannot be extracted
+    ///
+    /// Reasons include:
+    /// - Deletion/Censorship
+    /// - Age restriction
+    /// - Private video
+    /// - DRM (Movies and TV shows)
+    #[error("content unavailable ({reason})")]
+    Unavailable {
+        /// Reason why the video could not be extracted
+        reason: String,
+    },
 }

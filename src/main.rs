@@ -18,7 +18,7 @@ async fn main() -> Result<()> {
 
 async fn call_next() -> Result<()> {
     let client = YouTube::new();
-    let data = client.next("TbAsRmHYpKc").await?;
+    let data = client.fetch_recommended_videos("TbAsRmHYpKc").await?;
     dbg!(data);
     Ok(())
 }
