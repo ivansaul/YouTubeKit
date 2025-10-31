@@ -1,5 +1,5 @@
 use common::error::Result;
-use youtube::{client::YouTube, models::VideoTag};
+use youtube::client::YouTube;
 
 #[derive(uniffi::Object)]
 pub struct YouTubeBridge {
@@ -15,11 +15,6 @@ impl YouTubeBridge {
         }
     }
 
-    pub async fn token(&self, query: String) -> Result<String> {
-        let value = self.inner.token(query).await?;
-        Ok(value)
-    }
-
     pub async fn titles(&self, query: String) -> Result<Vec<String>> {
         let data = self
             .inner
@@ -31,8 +26,15 @@ impl YouTubeBridge {
         Ok(data)
     }
 
-    pub async fn videos(&self, query: String) -> Result<Vec<VideoTag>> {
-        let data = self.inner.search(query).await?;
-        Ok(data)
+    pub async fn fetch_video_details(&self, video_id: String) -> Result<String> {
+        let res = self.inner.get_video_details(video_id).await?;
+        let json = serde_json::to_string(&res)?;
+        Ok(json)
+    }
+
+    pub async fn next(&self, video_id: String) -> Result<String> {
+        let res = self.inner.next(video_id).await?;
+        let json = serde_json::to_string(&res)?;
+        Ok(json)
     }
 }

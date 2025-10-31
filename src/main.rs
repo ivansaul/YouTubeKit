@@ -3,22 +3,22 @@ use youtube::client::YouTube;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let yt = YouTube::new();
+    // let yt = YouTube::new();
+    // // let yt = YouTubeBridge::new();
 
-    // let dt = yt.get_video_details("e4s37VcWCj0").await?;
-    let dt = yt.search("archlinux hyperland").await?;
-
-    dbg!(dt);
+    // let data = yt.get_video_details("e0RvAwqU2uw").await?;
+    // // let dt = yt.search("archlinux hyperland").await?;
+    // // let data = yt.fetch_video_details("e0RvAwqU2uw".into()).await?;
+    // dbg!(data);
+    //
+    call_next().await?;
 
     Ok(())
 }
 
-// async fn main2() -> Result<()> {
-//     let client = Innertube::new(ClientType::IOS);
-//     let data: serde_json::Value = client.player("SzhWy7cUpsM").await?;
-//     // dbg!(data);
-//     let streams = &data["streamingData"]["adaptiveFormats"];
-//     dbg!(streams);
-//     println!("ok");
-//     Ok(())
-// }
+async fn call_next() -> Result<()> {
+    let client = YouTube::new();
+    let data = client.next("TbAsRmHYpKc").await?;
+    dbg!(data);
+    Ok(())
+}

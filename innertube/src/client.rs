@@ -38,6 +38,16 @@ impl Innertube {
         Ok(response)
     }
 
+    pub async fn next<T: DeserializeOwned>(&self, video_id: impl AsRef<str>) -> Result<T> {
+        let body = json!({"videoId": video_id.as_ref()});
+        let response = self
+            .call_api("next", None, body.into())
+            .await?
+            .json::<T>()
+            .await?;
+        Ok(response)
+    }
+
     fn base_url(&self) -> &str {
         "https://www.youtube.com/youtubei/v1"
     }
@@ -58,9 +68,6 @@ impl Innertube {
         body: Option<Value>,
     ) -> Result<Response> {
         let endpoint_url = format!("{}/{}", self.base_url(), endpoint);
-
-        dbg!(self.headers());
-        dbg!(self.context());
 
         let mut base_body = self.context();
 

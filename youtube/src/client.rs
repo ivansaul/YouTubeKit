@@ -1,9 +1,11 @@
+use crate::models::video_details::VideoDetails;
 use crate::models::VideoTag;
-use crate::response::player::{PlayerResponse, VideoDetails};
+use crate::response::next::NextResponse;
+use crate::response::player::PlayerResponse;
 use crate::response::search::{SearchResponse, SectionListRendererItem};
 use common::error::Result;
-
 use innertube::{client::Innertube, models::ClientType};
+use serde_json::Value;
 
 pub struct YouTube;
 
@@ -16,19 +18,12 @@ impl YouTube {
         &self,
         video_id: S,
     ) -> Result<Option<VideoDetails>> {
-        let innertube = Innertube::new(ClientType::IOS);
+        let innertube = Innertube::new(ClientType::WEB);
         let response = innertube
             .player::<PlayerResponse>(video_id.as_ref())
             .await?;
-        Ok(response.video_details)
-    }
 
-    pub async fn search2<S: AsRef<str>>(&self, query: S) -> Result<serde_json::Value> {
-        let innertube = Innertube::new(ClientType::WEB);
-        let response = innertube
-            .search::<serde_json::Value>(query.as_ref())
-            .await?;
-        Ok(response)
+        Ok(response.map_video_details())
     }
 
     pub async fn search<S: AsRef<str>>(&self, query: S) -> Result<Vec<VideoTag>> {
@@ -36,6 +31,12 @@ impl YouTube {
         let response = innertube.search::<SearchResponse>(query.as_ref()).await?;
         let data = response.map_response();
         Ok(data)
+    }
+
+    pub async fn next<S: AsRef<str>>(&self, video_id: S) -> Result<Vec<VideoTag>> {
+        let innertube = Innertube::new(ClientType::WEB);
+        let value = innertube.next::<Value>(video_id).await?;
+        NextResponse::new(value).map_recommended_videos()
     }
 
     pub async fn token<S: AsRef<str>>(&self, query: S) -> Result<String> {

@@ -1,4 +1,5 @@
 /target
 /generated
 /ytkit
+/innertube/src/response
 Cargo.lock

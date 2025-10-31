@@ -1,9 +1,9 @@
 pub mod thumbnail;
-pub mod video_item;
-
+pub mod video_details;
 use crate::models::thumbnail::Thumbnail;
+use serde::Serialize;
 
-#[derive(Debug, Clone, uniffi::Record)]
+#[derive(Debug, Serialize)]
 pub struct ChannelTag {
     /// Unique YouTube channel ID
     pub id: String,
@@ -21,7 +21,7 @@ pub struct ChannelTag {
     pub subscriber_count: Option<u64>,
 }
 
-#[derive(Debug, uniffi::Record)]
+#[derive(Debug, Serialize)]
 pub struct VideoTag {
     pub id: String,
     pub name: String,
@@ -30,18 +30,7 @@ pub struct VideoTag {
     pub length_text: Option<String>,
     pub view_count: Option<String>,
     pub channel: Option<ChannelTag>,
-}
-
-#[derive(Debug, Clone)]
-pub struct VideoTag2 {
-    pub id: String,
-    pub name: String,
-    pub length_seconds: String,
-    pub thumbnail: Vec<Thumbnail>,
-    pub channel: Option<ChannelTag>,
-    pub description: Option<String>,
-    pub view_count: Option<String>,
-    pub publish_date: Option<String>,
-    pub is_short: bool,
-    pub is_live: bool,
+    // pub is_short: bool,
+    // pub is_live: bool,
+    // pub description: Option<String>,
 }

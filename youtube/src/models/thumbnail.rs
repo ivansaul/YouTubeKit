@@ -1,6 +1,6 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Clone, uniffi::Record)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Thumbnail {
     pub url: String,
     pub width: i64,
