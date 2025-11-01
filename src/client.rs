@@ -15,15 +15,10 @@ impl YouTubeBridge {
         }
     }
 
-    pub async fn titles(&self, query: String) -> Result<Vec<String>> {
-        let data = self
-            .inner
-            .search(query)
-            .await?
-            .iter()
-            .map(|video| video.name.clone())
-            .collect();
-        Ok(data)
+    pub async fn search(&self, query: String) -> Result<String> {
+        let res = self.inner.search(query).await?;
+        let json = serde_json::to_string(&res)?;
+        Ok(json)
     }
 
     pub async fn fetch_video_details(&self, video_id: String) -> Result<String> {
@@ -32,7 +27,7 @@ impl YouTubeBridge {
         Ok(json)
     }
 
-    pub async fn next(&self, video_id: String) -> Result<String> {
+    pub async fn fetch_recommended_videos(&self, video_id: String) -> Result<String> {
         let res = self.inner.fetch_recommended_videos(video_id).await?;
         let json = serde_json::to_string(&res)?;
         Ok(json)

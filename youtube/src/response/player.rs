@@ -65,6 +65,13 @@ pub(crate) enum PlayabilityStatus {
         reason: String,
     },
 
+    /// Video can't be played because of DRM / Geoblock
+    #[serde(rename_all = "camelCase")]
+    Unplayable {
+        #[serde(default)]
+        reason: String,
+    },
+
     /// Video was censored / deleted / unavailable
     #[serde(rename_all = "camelCase")]
     Error {

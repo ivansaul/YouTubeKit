@@ -5,6 +5,7 @@ use youtube::client::YouTube;
 #[case("TbAsRmHYpKc")]
 #[case("wiRRsHPTSC8")] // age restricted video
 #[case("mKCieTImjvU")] // live stream
+#[case("tbpfMbwDlpg")] // members only video
 #[tokio::test]
 async fn video_details_test(#[case] id: &str) -> anyhow::Result<()> {
     let client = YouTube::new();

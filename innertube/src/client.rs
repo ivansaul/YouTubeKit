@@ -1,6 +1,6 @@
 use crate::models::ClientType;
 use common::error::Result;
-use reqwest::{header::HeaderMap, Response};
+use reqwest::header::HeaderMap;
 use serde::de::DeserializeOwned;
 use serde_json::{json, Value};
 
@@ -20,31 +20,19 @@ impl Innertube {
 
     pub async fn player<T: DeserializeOwned>(&self, video_id: &str) -> Result<T> {
         let body = json!({"videoId": video_id});
-        let response = self
-            .call_api("player", None, body.into())
-            .await?
-            .json::<T>()
-            .await?;
+        let response = self.call_api("player", None, body.into()).await?;
         Ok(response)
     }
 
     pub async fn search<T: DeserializeOwned>(&self, query: &str) -> Result<T> {
         let body = json!({"query": query});
-        let response = self
-            .call_api("search", None, body.into())
-            .await?
-            .json::<T>()
-            .await?;
+        let response = self.call_api::<T>("search", None, body.into()).await?;
         Ok(response)
     }
 
     pub async fn next<T: DeserializeOwned>(&self, video_id: impl AsRef<str>) -> Result<T> {
         let body = json!({"videoId": video_id.as_ref()});
-        let response = self
-            .call_api("next", None, body.into())
-            .await?
-            .json::<T>()
-            .await?;
+        let response = self.call_api("next", None, body.into()).await?;
         Ok(response)
     }
 
@@ -61,12 +49,12 @@ impl Innertube {
         self.client_type.headers()
     }
 
-    async fn call_api(
+    async fn call_api<T: DeserializeOwned>(
         &self,
         endpoint: &str,
         query: Option<&[(&str, &str)]>,
         body: Option<Value>,
-    ) -> Result<Response> {
+    ) -> Result<T> {
         let endpoint_url = format!("{}/{}", self.base_url(), endpoint);
 
         let mut base_body = self.context();
@@ -87,6 +75,8 @@ impl Innertube {
             .send()
             .await?;
 
-        Ok(response)
+        let text = response.text().await?;
+        let json = serde_json::from_str::<T>(&text)?;
+        Ok(json)
     }
 }

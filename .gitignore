@@ -3,3 +3,4 @@
 /ytkit
 /innertube/src/response
 Cargo.lock
+/youtube/*.json
