@@ -4,6 +4,7 @@ use youtube::client::YouTube;
 #[rstest]
 #[case("TbAsRmHYpKc")]
 #[case("wiRRsHPTSC8")] // age restricted video
+#[case("mKCieTImjvU")] // live stream
 #[tokio::test]
 async fn video_details_test(#[case] id: &str) -> anyhow::Result<()> {
     let client = YouTube::new();
