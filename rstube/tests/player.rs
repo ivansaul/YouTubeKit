@@ -1,5 +1,5 @@
 use rstest::rstest;
-use youtube::client::YouTube;
+use rstube::client::RusTube;
 
 #[rstest]
 #[case("TbAsRmHYpKc")]
@@ -8,8 +8,8 @@ use youtube::client::YouTube;
 #[case("tbpfMbwDlpg")] // members only video
 #[tokio::test]
 async fn video_details_test(#[case] id: &str) -> anyhow::Result<()> {
-    let client = YouTube::new();
-    let res = client.fetch_video_details(id).await?;
+    let client = RusTube::new();
+    let res = client.fetch_video_info(id).await?;
 
     assert_eq!(res.id, id);
     assert!(!res.title.is_empty());
@@ -26,7 +26,7 @@ async fn video_details_test(#[case] id: &str) -> anyhow::Result<()> {
 #[case("unavailable")] // unavailable video
 #[tokio::test]
 async fn video_details_error_test(#[case] id: &str) {
-    let client = YouTube::new();
-    let res = client.fetch_video_details(id).await;
+    let client = RusTube::new();
+    let res = client.fetch_video_info(id).await;
     assert!(res.is_err());
 }

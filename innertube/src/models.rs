@@ -14,13 +14,13 @@ pub enum ClientType {
 }
 
 impl ClientType {
-    pub fn context(&self) -> Value {
+    pub(crate) fn context(&self) -> Value {
         self.get_client_config()
             .map(|cfg| cfg.context)
             .unwrap_or_default()
     }
 
-    pub fn headers(&self) -> HeaderMap {
+    pub(crate) fn headers(&self) -> HeaderMap {
         let mut map = HeaderMap::new();
 
         for (k, v) in self

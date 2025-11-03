@@ -1,4 +1,4 @@
-use crate::models::{thumbnail::Thumbnail, ChannelTag, VideoTag};
+use crate::models::{ChannelPreview, Thumbnail, VideoPreview};
 use common::error::{ExtractionError, Result};
 use jsonpath_rust::JsonPath;
 use serde_json::Value;
@@ -12,7 +12,7 @@ impl NextResponse {
         Self { value }
     }
 
-    pub fn map_recommended_videos(&self) -> Result<Vec<VideoTag>> {
+    pub fn map_recommended_videos(&self) -> Result<Vec<VideoPreview>> {
         let lockup_vm_path = concat!(
             "$.contents",
             ".twoColumnWatchNextResults",
@@ -72,7 +72,7 @@ impl NextResponse {
             ExtractionError::InvalidData("[NextResponse] Could not collect recomended videos")
         })?;
 
-        let mut recomended_videos: Vec<VideoTag> = Vec::new();
+        let mut recomended_videos: Vec<VideoPreview> = Vec::new();
 
         for lockup_vm in lockup_vm_list.iter() {
             let video_id = lockup_vm
@@ -119,9 +119,9 @@ impl NextResponse {
 
             let channel = map_lockup_vm_to_channel_tag(lockup_vm);
 
-            recomended_videos.push(VideoTag {
+            recomended_videos.push(VideoPreview {
                 id: video_id.into(),
-                name: video_title.into(),
+                title: video_title.into(),
                 thumbnail: video_thumbnail,
                 publish_date,
                 length_text: lenght_text,
@@ -133,7 +133,7 @@ impl NextResponse {
     }
 }
 
-fn map_lockup_vm_to_channel_tag(lockup_vm: &Value) -> Option<ChannelTag> {
+fn map_lockup_vm_to_channel_tag(lockup_vm: &Value) -> Option<ChannelPreview> {
     let channel_id_path = concat!(
         "$.metadata",
         ".lockupMetadataViewModel",
@@ -201,7 +201,7 @@ fn map_lockup_vm_to_channel_tag(lockup_vm: &Value) -> Option<ChannelTag> {
         .first_one()
         .and_then(|f| serde_json::from_value::<Vec<Thumbnail>>(f.clone()).ok())?;
 
-    Some(ChannelTag {
+    Some(ChannelPreview {
         id: channel_id,
         name: channel_name,
         label: channel_label,

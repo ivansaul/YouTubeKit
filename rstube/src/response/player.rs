@@ -1,5 +1,5 @@
-use crate::models::thumbnail::Thumbnail;
-use crate::models::video_details::VideoDetails;
+use crate::models::Thumbnail;
+use crate::models::VideoInfo;
 
 use common::error::ExtractionError;
 use serde::Deserialize;
@@ -86,7 +86,7 @@ pub struct Thumbnails {
 }
 
 impl PlayerResponse {
-    pub fn map_video_details(self) -> Result<VideoDetails, ExtractionError> {
+    pub fn map_video_details(self) -> Result<VideoInfo, ExtractionError> {
         if let PlayabilityStatus::Error { reason } = self.playability_status {
             return Err(ExtractionError::Unavailable { reason });
         }
@@ -95,7 +95,7 @@ impl PlayerResponse {
             "[PlayerResponse] Video details not found",
         ))?;
 
-        let mut video = VideoDetails {
+        let mut video = VideoInfo {
             id: details.video_id,
             title: details.title,
             duration: details.length_seconds,

@@ -1,5 +1,5 @@
 use crate::{
-    models::{ChannelTag, VideoTag},
+    models::{ChannelPreview, VideoPreview},
     response::player::Thumbnails,
 };
 use serde::Deserialize;
@@ -41,9 +41,6 @@ pub enum SectionListRendererItem {
     #[serde(rename_all = "camelCase")]
     ItemSectionRenderer(ItemSectionRenderer),
 
-    #[serde(rename_all = "camelCase")]
-    ContinuationItemRenderer(ContinuationItemRenderer),
-
     #[serde(other, deserialize_with = "deserialize_ignore_any")]
     Other,
 }
@@ -58,7 +55,7 @@ pub struct ItemSectionRenderer {
 #[serde(rename_all = "camelCase")]
 pub enum ItemSectionRendererItem {
     #[serde(rename_all = "camelCase")]
-    VideoRenderer(VideoRenderer),
+    VideoRenderer(Box<VideoRenderer>),
 
     #[serde(other, deserialize_with = "deserialize_ignore_any")]
     Other,
@@ -158,33 +155,11 @@ pub struct ChannelThumbnailWithLinkRenderer {
     pub navigation_endpoint: NavigationEndpoint,
 }
 
-// =========================
-// ContinuationItemRenderer
-// =========================
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ContinuationItemRenderer {
-    pub continuation_endpoint: ContinuationEndpoint,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ContinuationEndpoint {
-    pub continuation_command: ContinuationCommand,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ContinuationCommand {
-    pub token: String,
-}
-
 // =======================
 // Map Response
 // =======================
 
-fn map_video_render(item: &VideoRenderer) -> VideoTag {
+fn map_video_render(item: &VideoRenderer) -> VideoPreview {
     let title = item
         .title
         .runs
@@ -220,7 +195,7 @@ fn map_video_render(item: &VideoRenderer) -> VideoTag {
         .owner_text
         .as_ref()
         .and_then(|owner_text| owner_text.runs.first())
-        .map(|owner| ChannelTag {
+        .map(|owner| ChannelPreview {
             id: channel_id,
             name: owner.text.clone(),
             label: channel_label.unwrap_or_default(),
@@ -228,9 +203,9 @@ fn map_video_render(item: &VideoRenderer) -> VideoTag {
             subscriber_count: None,
         });
 
-    VideoTag {
+    VideoPreview {
         id: item.video_id.clone(),
-        name: title,
+        title,
         thumbnail: item.thumbnail.thumbnails.clone(),
         publish_date: item.published_time_text.as_ref().map(|i| i.text.clone()),
         length_text: item.length_text.as_ref().map(|i| i.text.clone()),
@@ -243,7 +218,7 @@ fn map_video_render(item: &VideoRenderer) -> VideoTag {
 }
 
 impl SearchResponse {
-    pub fn map_response(&self) -> Vec<VideoTag> {
+    pub fn map_response(&self) -> Vec<VideoPreview> {
         self.contents
             .two_column_search_results_renderer
             .primary_contents
@@ -259,7 +234,7 @@ impl SearchResponse {
                 ItemSectionRendererItem::VideoRenderer(item) => Some(item),
                 _ => None,
             })
-            .map(map_video_render)
+            .map(|item| map_video_render(item.as_ref()))
             .collect::<Vec<_>>()
     }
 }

@@ -3,4 +3,7 @@
 /ytkit
 /innertube/src/response
 Cargo.lock
-/youtube/*.json
+/rstube/*.json
+/nexus/Ytkit
+/nexus/generated
+.DS_Store

@@ -5,12 +5,12 @@ use serde::de::DeserializeOwned;
 use serde_json::{json, Value};
 
 #[derive(Debug)]
-pub struct Innertube {
+pub struct InnerTube {
     client_type: ClientType,
     client: reqwest::Client,
 }
 
-impl Innertube {
+impl InnerTube {
     pub fn new(client_type: ClientType) -> Self {
         Self {
             client_type,
@@ -18,14 +18,14 @@ impl Innertube {
         }
     }
 
-    pub async fn player<T: DeserializeOwned>(&self, video_id: &str) -> Result<T> {
-        let body = json!({"videoId": video_id});
+    pub async fn player<T: DeserializeOwned>(&self, video_id: impl AsRef<str>) -> Result<T> {
+        let body = json!({"videoId": video_id.as_ref()});
         let response = self.call_api("player", None, body.into()).await?;
         Ok(response)
     }
 
-    pub async fn search<T: DeserializeOwned>(&self, query: &str) -> Result<T> {
-        let body = json!({"query": query});
+    pub async fn search<T: DeserializeOwned>(&self, query: impl AsRef<str>) -> Result<T> {
+        let body = json!({"query": query.as_ref()});
         let response = self.call_api::<T>("search", None, body.into()).await?;
         Ok(response)
     }
@@ -41,10 +41,11 @@ impl Innertube {
     }
 }
 
-impl Innertube {
+impl InnerTube {
     fn context(&self) -> Value {
         self.client_type.context()
     }
+
     fn headers(&self) -> HeaderMap {
         self.client_type.headers()
     }
