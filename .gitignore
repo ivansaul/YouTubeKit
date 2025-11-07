@@ -1,0 +1,9 @@
+/target
+/generated
+/ytkit
+/innertube/src/response
+Cargo.lock
+/rstube/*.json
+/nexus/Ytkit
+/nexus/generated
+.DS_Store
