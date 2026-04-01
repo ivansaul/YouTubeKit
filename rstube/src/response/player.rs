@@ -1,11 +1,13 @@
-use crate::models::Thumbnail;
-use crate::models::VideoInfo;
-
-use common::error::ExtractionError;
 use serde::Deserialize;
-use serde_with::serde_as;
-use serde_with::DisplayFromStr;
+use serde_with::{serde_as, DisplayFromStr};
 use time::OffsetDateTime;
+
+use crate::{
+    error::ExtractionError,
+    models::VideoDetails,
+    response::Thumbnails,
+    serializer::{MapRespCtx, MapResponse, MapResult},
+};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -80,23 +82,37 @@ pub(crate) enum PlayabilityStatus {
     },
 }
 
-#[derive(Debug, Deserialize)]
-pub struct Thumbnails {
-    pub thumbnails: Vec<Thumbnail>,
-}
+impl MapResponse<VideoDetails> for PlayerResponse {
+    fn map_response(
+        self,
+        ctx: &MapRespCtx<'_>,
+    ) -> Result<MapResult<VideoDetails>, ExtractionError> {
+        let mut warnings = Vec::new();
 
-impl PlayerResponse {
-    pub fn map_video_details(self) -> Result<VideoInfo, ExtractionError> {
-        if let PlayabilityStatus::Error { reason } = self.playability_status {
-            return Err(ExtractionError::Unavailable { reason });
+        match self.playability_status {
+            PlayabilityStatus::Ok => {}
+            PlayabilityStatus::LoginRequired { reason }
+            | PlayabilityStatus::Unplayable { reason } => warnings.push(reason),
+            PlayabilityStatus::Error { reason } => {
+                return Err(ExtractionError::Unavailable { reason });
+            }
         }
 
-        let details = self.video_details.ok_or(ExtractionError::InvalidData(
-            "[PlayerResponse] Video details not found",
-        ))?;
+        let details = self
+            .video_details
+            .ok_or_else(|| ExtractionError::InvalidData("Video details not found".into()))?;
 
-        let mut video = VideoInfo {
-            id: details.video_id,
+        let video_id = details.video_id;
+
+        if ctx.id != video_id {
+            return Err(ExtractionError::WrongResult(format!(
+                "got wrong video id {}, expected {}",
+                video_id, ctx.id
+            )));
+        }
+
+        let mut video = VideoDetails {
+            id: video_id,
             title: details.title,
             duration: details.length_seconds,
             keywords: details.keywords,
@@ -114,6 +130,9 @@ impl PlayerResponse {
             video.publish_date = mf.publish_date;
         }
 
-        Ok(video)
+        Ok(MapResult {
+            content: video,
+            warnings,
+        })
     }
 }

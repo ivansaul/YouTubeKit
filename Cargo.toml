@@ -1,5 +1,5 @@
 [workspace]
-members = ["common", "innertube", "rstube", "nexus"]
+members = ["rstube"]
 resolver = "2"
 
 [workspace.dependencies]
@@ -10,8 +10,8 @@ rstest = "0.26.1"
 serde = { version = "1.0.221", features = ["derive"] }
 serde_json = "1.0.145"
 serde_with = "3.15.0"
-strum = { version = "0.27.2", features = ["derive"] }
 thiserror = "2.0.16"
 time = { version = "0.3.44", features = ["serde-human-readable"] }
 tokio = { version = "1.47.1", features = ["full"] }
+tracing = "0.1.44"
 uniffi = { version = "0.29", features = ["tokio"] }

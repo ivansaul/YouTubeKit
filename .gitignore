@@ -6,4 +6,6 @@ Cargo.lock
 /rstube/*.json
 /nexus/Ytkit
 /nexus/generated
+.tmp
+rstube/tests/fixtures
 .DS_Store
