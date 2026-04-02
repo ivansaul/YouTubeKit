@@ -22,7 +22,7 @@ struct QBody<T> {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct QPlayer<'a> {
+struct QVideo<'a> {
     video_id: &'a str,
 }
 

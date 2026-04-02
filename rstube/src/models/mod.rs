@@ -5,7 +5,6 @@ pub mod thumbnail;
 pub mod video;
 
 // Re-export top-level types for convenience
-pub use channel::ChannelPreview;
 pub use thumbnail::Thumbnail;
 pub use video::{VideoDetails, VideoItem, VideoPreview};
 
