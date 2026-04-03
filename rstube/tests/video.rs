@@ -24,6 +24,18 @@ async fn video_live() -> anyhow::Result<()> {
 }
 
 #[rstest]
+#[case("ZBFPSyFgEI4")]
+#[case("x6AmYXm9Bf0")]
+#[tokio::test]
+async fn video_shorts(#[case] id: &str) -> anyhow::Result<()> {
+    let res = RusTube::new().query().video(id).send().await?;
+    assert_eq!(res.id, id);
+    assert!(!res.title.is_empty());
+    assert!(res.is_short);
+    Ok(())
+}
+
+#[rstest]
 #[case("qoWRs7lXtYE", Verification::Artist)]
 #[case("XcK35ikbKGk", Verification::Verified)]
 #[case("TbAsRmHYpKc", Verification::None)]
