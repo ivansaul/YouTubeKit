@@ -63,7 +63,7 @@ impl<T: FromYtItem> MapResponse<Page<T>> for SearchResponse {
                 ctoken: mapper.ctoken,
                 endpoint: ctx.endpoint,
                 estimated_results: self.estimated_results,
-                corrected_query: None,
+                corrected_query: mapper.corrected_query,
             },
             warnings: mapper.warnings,
         })

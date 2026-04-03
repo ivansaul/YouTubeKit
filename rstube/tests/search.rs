@@ -1,8 +1,4 @@
-use rstube::{
-    client::RusTube,
-    locale::Language,
-    models::VideoItem,
-};
+use rstube::{client::RusTube, locale::Language, models::VideoItem};
 
 /// Tests that a basic search returns non-empty results.
 #[tokio::test]
@@ -43,5 +39,19 @@ async fn search_pagination() -> anyhow::Result<()> {
     }
 
     assert!(pages_fetched >= 2, "expected at least 2 pages");
+    Ok(())
+}
+
+#[tokio::test]
+async fn search_corrected_query() -> anyhow::Result<()> {
+    let client = RusTube::new();
+    let res = client
+        .query()
+        .lang(Language::Japanese)
+        .search("archlinux hyperland")
+        .send::<VideoItem>()
+        .await?;
+
+    assert!(res.corrected_query.is_some());
     Ok(())
 }

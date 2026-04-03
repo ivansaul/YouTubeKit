@@ -23,6 +23,13 @@ pub(crate) enum YouTubeListItem {
         contents: MapResult<Vec<YouTubeListItem>>,
     },
 
+    /// Corrected search query
+    #[serde(rename_all = "camelCase")]
+    DidYouMeanRenderer {
+        #[serde_as(as = "Text")]
+        corrected_query: String,
+    },
+
     /// No video list item (e.g. ad) or unimplemented item
     #[serde(other, deserialize_with = "deserialize_ignore_any")]
     None,
@@ -73,7 +80,7 @@ pub(crate) struct YouTubeListMapper<T> {
     pub warnings: Vec<String>,
     pub ctoken: Option<String>,
     /// Query corrected by YouTube (populated when available in response)
-    pub _corrected_query: Option<String>,
+    pub corrected_query: Option<String>,
 }
 
 impl<T> YouTubeListMapper<T> {
@@ -83,7 +90,7 @@ impl<T> YouTubeListMapper<T> {
             items: Vec::new(),
             warnings: Vec::new(),
             ctoken: None,
-            _corrected_query: None,
+            corrected_query: None,
         }
     }
 
@@ -112,6 +119,9 @@ impl YouTubeListMapper<YouTubeItem> {
             }
             YouTubeListItem::ContinuationItemRenderer(r) => {
                 self.ctoken = Some(r.continuation_endpoint.into_token());
+            }
+            YouTubeListItem::DidYouMeanRenderer { corrected_query } => {
+                self.corrected_query = Some(corrected_query);
             }
             YouTubeListItem::None => {}
         }
