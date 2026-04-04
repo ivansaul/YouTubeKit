@@ -1,74 +1,12 @@
+use time::OffsetDateTime;
+
 use crate::{
     locale::Language,
-    models::{VideoItem, YouTubeItem},
-    response::Thumbnails,
-    serializer::{text::Text, MapResult},
+    models::{channel::ChannelTag, VideoItem, YouTubeItem},
+    response::youtube_item::{IsLive, IsShort, TimeOverlayStyle, VideoRenderer, YouTubeListItem},
+    serializer::MapResult,
+    utils,
 };
-use serde::Deserialize;
-use serde_with::{rust::deserialize_ignore_any, serde_as};
-
-#[serde_as]
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub(crate) enum YouTubeListItem {
-    #[serde(alias = "gridVideoRenderer", alias = "compactVideoRenderer")]
-    VideoRenderer(VideoRenderer),
-
-    /// Continuation items are located at the end of a list
-    /// and contain the continuation token for progressive loading.
-    ContinuationItemRenderer(ContinuationItemRenderer),
-
-    /// Contains search results (e.g. "Upcoming live" or "Community posts")
-    ItemSectionRenderer {
-        contents: MapResult<Vec<YouTubeListItem>>,
-    },
-
-    /// Corrected search query
-    #[serde(rename_all = "camelCase")]
-    DidYouMeanRenderer {
-        #[serde_as(as = "Text")]
-        corrected_query: String,
-    },
-
-    /// No video list item (e.g. ad) or unimplemented item
-    #[serde(other, deserialize_with = "deserialize_ignore_any")]
-    None,
-}
-
-#[serde_as]
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct VideoRenderer {
-    pub video_id: String,
-    pub thumbnail: Thumbnails,
-    #[serde_as(as = "Text")]
-    pub title: String,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct ContinuationItemRenderer {
-    pub continuation_endpoint: ContinuationEndpoint,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct ContinuationEndpoint {
-    pub continuation_command: ContinuationCommand,
-}
-
-impl ContinuationEndpoint {
-    /// Extracts the raw continuation token string.
-    pub(crate) fn into_token(self) -> String {
-        self.continuation_command.token
-    }
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct ContinuationCommand {
-    pub token: String,
-}
 
 /// Maps a mixed list of YouTube entities (videos, channels, playlists)
 /// into typed model items, collecting warnings for unrecognized items.
@@ -95,10 +33,76 @@ impl<T> YouTubeListMapper<T> {
     }
 
     fn map_video(&mut self, video: VideoRenderer) -> VideoItem {
+        let is_live = video.thumbnail_overlays.is_live() || video.badges.is_live();
+        let is_short = video.thumbnail_overlays.is_short();
+        let is_upcoming = video.upcoming_event_data.is_some();
+
+        let length_text = video.length_text.or_else(|| {
+            video
+                .thumbnail_overlays
+                .into_iter()
+                .find(|ol| {
+                    ol.thumbnail_overlay_time_status_renderer.style == TimeOverlayStyle::Default
+                })
+                .map(|ol| ol.thumbnail_overlay_time_status_renderer.text)
+        });
+
+        let short_description = video
+            .detailed_metadata_snippets
+            .and_then(|snippets| snippets.into_iter().next().map(|d| d.snippet_text))
+            .or(video.description_snippet);
+
+        let view_count = video
+            .view_count_text
+            .and_then(|txt| utils::numeric::parse_numeric(&txt).ok());
+
+        let duration = length_text.and_then(|text| utils::numeric::parse_video_length(&text));
+
+        let publish_date = video
+            .upcoming_event_data
+            .as_ref()
+            .and_then(|upc| OffsetDateTime::from_unix_timestamp(upc.start_time).ok())
+            // or_else(|| {
+            // TODO: parse from video.published_time_text
+            // })
+        ;
+
+        let channel_avatar = video
+            .channel_thumbnail_supported_renderers
+            .map(|c| c.channel_thumbnail_with_link_renderer.thumbnail.thumbnails)
+            .unwrap_or_default();
+
+        let channel_badge = video.owner_badges.into();
+
+        let channel = video
+            .channel
+            .and_then(|s| s.runs.into_iter().next())
+            .map(|r| ChannelTag {
+                id: r.navigation_endpoint.browse_endpoint.browse_id,
+                name: r.text,
+                handle: r
+                    .navigation_endpoint
+                    .browse_endpoint
+                    .canonical_base_url
+                    .map(|h| h.replace("/@", "")),
+                avatar: channel_avatar,
+                verification: channel_badge,
+                subscriber_count: None,
+            });
+
         VideoItem {
             id: video.video_id,
             name: video.title,
             thumbnails: video.thumbnail.thumbnails,
+            duration,
+            channel,
+            view_count,
+            is_live,
+            is_short,
+            is_upcoming,
+            publish_date,
+            publish_date_txt: video.published_time_text,
+            short_description,
         }
     }
 }

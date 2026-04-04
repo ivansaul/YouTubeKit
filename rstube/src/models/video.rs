@@ -1,14 +1,10 @@
 use serde::Deserialize;
 use time::OffsetDateTime;
 
-use crate::models::{
-    channel::{ChannelPreview, ChannelTag},
-    thumbnail::Thumbnail,
-};
+use crate::models::{channel::ChannelTag, thumbnail::Thumbnail};
 
 /// YouTube video item from search results, recommendations or playlists
-#[derive(Debug)]
-#[non_exhaustive]
+#[derive(Debug, Deserialize)]
 pub struct VideoItem {
     /// Unique YouTube video ID
     pub id: String,
@@ -16,18 +12,33 @@ pub struct VideoItem {
     pub name: String,
     /// Video thumbnails
     pub thumbnails: Vec<Thumbnail>,
-}
-
-/// Lightweight video preview (for listings)
-#[derive(Debug)]
-pub struct VideoPreview {
-    pub id: String,
-    pub title: String,
-    pub thumbnail: Vec<Thumbnail>,
-    pub publish_date: Option<String>,
-    pub length_text: Option<String>,
-    pub view_count: Option<String>,
-    pub channel: Option<ChannelPreview>,
+    /// Channel of the video
+    pub channel: Option<ChannelTag>,
+    /// Video duration in seconds.
+    ///
+    /// Is [`None`] for livestreams.
+    pub duration: Option<u32>,
+    /// View count
+    ///
+    /// [`None`] if it could not be extracted.
+    pub view_count: Option<u64>,
+    /// Is the video an active livestream?
+    pub is_live: bool,
+    /// Is the video a YouTube Short video (vertical and <60s)?
+    pub is_short: bool,
+    /// Is the video announced, but not released yet (YouTube Premiere)?
+    pub is_upcoming: bool,
+    /// Video publishing date.
+    ///
+    /// [`None`] if the date could not be parsed.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub publish_date: Option<OffsetDateTime>,
+    /// Textual video publish date (e.g. `11 months ago`, depends on language)
+    ///
+    /// Is [`None`] for livestreams and upcoming videos.
+    pub publish_date_txt: Option<String>,
+    /// Abbreviated video description
+    pub short_description: Option<String>,
 }
 
 /// Full video details fetched from the player endpoint

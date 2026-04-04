@@ -3,6 +3,7 @@ pub mod mapper;
 pub mod next;
 pub mod player;
 pub mod search;
+pub mod youtube_item;
 
 use crate::models::{self, Thumbnail};
 use serde::Deserialize;

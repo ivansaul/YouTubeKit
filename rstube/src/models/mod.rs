@@ -6,7 +6,7 @@ pub mod video;
 
 // Re-export top-level types for convenience
 pub use thumbnail::Thumbnail;
-pub use video::{VideoDetails, VideoItem, VideoPreview};
+pub use video::{VideoDetails, VideoItem};
 
 /// Discriminated union of all YouTube content types.
 ///

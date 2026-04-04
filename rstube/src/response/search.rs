@@ -4,7 +4,7 @@ use serde_with::{serde_as, DisplayFromStr};
 use crate::{
     error::ExtractionError,
     models::{convert::FromYtItem, paginator::Page, YouTubeItem},
-    response::mapper::{YouTubeListItem, YouTubeListMapper},
+    response::{mapper::YouTubeListMapper, youtube_item::YouTubeListItem},
     serializer::{MapRespCtx, MapResponse, MapResult},
 };
 

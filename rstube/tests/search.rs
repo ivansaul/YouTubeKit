@@ -1,28 +1,27 @@
-use rstube::{client::RusTube, locale::Language, models::VideoItem};
+use rstube::{client::RusTube, models::VideoItem};
 
-/// Tests that a basic search returns non-empty results.
 #[tokio::test]
-async fn search_returns_results() -> anyhow::Result<()> {
+async fn search_videos() -> anyhow::Result<()> {
     let client = RusTube::new();
     let res = client
         .query()
-        .lang(Language::EnglishUS)
-        .search("Rust programming language")
+        .search("archlinux hyperland")
         .send::<VideoItem>()
         .await?;
 
+    assert!(res.estimated_results.is_some());
+    assert!(res.corrected_query.is_some());
     assert!(!res.paginator.items().is_empty());
+
     Ok(())
 }
 
-/// Tests that pagination works correctly across multiple pages.
 #[tokio::test]
 async fn search_pagination() -> anyhow::Result<()> {
     let client = RusTube::new();
     let res = client
         .query()
-        .lang(Language::Japanese)
-        .search("Rust programming language")
+        .search("rust programming language")
         .send::<VideoItem>()
         .await?;
 
@@ -43,15 +42,19 @@ async fn search_pagination() -> anyhow::Result<()> {
 }
 
 #[tokio::test]
-async fn search_corrected_query() -> anyhow::Result<()> {
+async fn search_live_streams() -> anyhow::Result<()> {
     let client = RusTube::new();
     let res = client
         .query()
-        .lang(Language::Japanese)
-        .search("archlinux hyperland")
+        .search("live stream")
         .send::<VideoItem>()
         .await?;
 
-    assert!(res.corrected_query.is_some());
+    assert!(res.estimated_results.is_some());
+
+    let items = res.paginator.items();
+    assert!(!items.is_empty());
+    assert!(items.iter().find(|v| v.is_live).is_some());
+
     Ok(())
 }
